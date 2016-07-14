@@ -12,6 +12,11 @@ assert 'IO#raw' do
   $stdin.raw do |io|
     assert_equal $stdin, io
   end
+  assert_raise(StandardError) do
+    $stdin.raw do |io|
+      raise StandardError
+    end
+  end
 end
 
 assert 'IO#cooked' do

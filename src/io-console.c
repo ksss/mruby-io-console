@@ -38,6 +38,31 @@ set_cookedmode(conmode *t, void *arg)
   t->c_iflag |= (BRKINT|ISTRIP|ICRNL|IXON);
   t->c_oflag |= OPOST;
   t->c_lflag |= (ECHO|ECHOE|ECHOK|ECHONL|ICANON|ISIG|IEXTEN);
+static mrb_value
+console_yield(mrb_state *mrb, mrb_value block)
+{
+  return mrb_yield_argv(mrb, block, 1, &mrb->c->stack[0]);
+}
+
+static mrb_value
+console_raw(mrb_state *mrb, mrb_value self)
+{
+  mrb_value block;
+  mrb_value result;
+  mrb_bool state;
+  conmode t, bt;
+
+  mrb_get_args(mrb, "&", &block);
+  int fd = (int)mrb_fixnum(mrb_io_fileno(mrb, self));
+  if (!getattr(fd, &t)) mrb_sys_fail(mrb, 0);
+  bt = t;
+  set_rawmode(&t, NULL);
+  if (!setattr(fd, &t)) mrb_sys_fail(mrb, 0);
+  result = mrb_protect(mrb, console_yield, block, &state);
+  if (state) {
+    mrb_exc_raise(mrb, result);
+  }
+  return self;
 }
 
 static mrb_value
@@ -76,6 +101,7 @@ void
 mrb_mruby_io_console_gem_init(mrb_state* mrb)
 {
   struct RClass *io = mrb_define_class(mrb, "IO", mrb->object_class);
+  mrb_define_method(mrb, io, "raw", console_raw, MRB_ARGS_NONE());
   mrb_define_method(mrb, io, "raw!", console_set_raw, MRB_ARGS_NONE());
   mrb_define_method(mrb, io, "cooked!", console_set_cooked, MRB_ARGS_NONE());
   mrb_define_method(mrb, io, "winsize", console_winsize, MRB_ARGS_NONE());
