@@ -25,6 +25,11 @@ assert 'IO#cooked' do
   $stdin.cooked do |io|
     assert_equal $stdin, io
   end
+  assert_raise(StandardError) do
+    $stdin.cooked do |io|
+      raise StandardError
+    end
+  end
 end
 
 assert 'IO#winsize' do
