@@ -58,6 +58,7 @@ ttymode(mrb_state *mrb, int fd, mrb_value block, mrb_value self, void (*setter)(
   setter(&t, NULL);
   if (!setattr(fd, &t)) mrb_sys_fail(mrb, 0);
   result = mrb_protect(mrb, console_yield, block, &state);
+  if (!setattr(fd, &bt)) mrb_sys_fail(mrb, 0);
   if (state) {
     mrb_exc_raise(mrb, result);
   }
