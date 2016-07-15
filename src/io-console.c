@@ -53,16 +53,14 @@ console_yield(mrb_state *mrb, mrb_value block)
 }
 
 static mrb_value
-ttymode(mrb_state *mrb, mrb_value *self, void (*setter)(conmode *, void *))
+ttymode(mrb_state *mrb, int fd, void (*setter)(conmode *, void *))
 {
   mrb_value block;
   mrb_value result;
   mrb_bool state;
   conmode t, bt;
-  int fd;
 
   mrb_get_args(mrb, "&", &block);
-  fd = (int)mrb_fixnum(mrb_io_fileno(mrb, *self));
   if (!getattr(fd, &t)) mrb_sys_fail(mrb, 0);
   bt = t;
   setter(&t, NULL);
@@ -78,7 +76,7 @@ ttymode(mrb_state *mrb, mrb_value *self, void (*setter)(conmode *, void *))
 static mrb_value
 console_raw(mrb_state *mrb, mrb_value self)
 {
-  return ttymode(mrb, &self, set_rawmode);
+  return ttymode(mrb, (int)mrb_fixnum(mrb_io_fileno(mrb, self)), set_rawmode);
 }
 
 static mrb_value
@@ -95,7 +93,7 @@ console_set_raw(mrb_state *mrb, mrb_value self)
 static mrb_value
 console_cooked(mrb_state *mrb, mrb_value self)
 {
-  return ttymode(mrb, &self, set_cookedmode);
+  return ttymode(mrb, (int)mrb_fixnum(mrb_io_fileno(mrb, self)), set_cookedmode);
 }
 
 static mrb_value
@@ -112,7 +110,7 @@ console_set_cooked(mrb_state *mrb, mrb_value self)
 static mrb_value
 console_noecho(mrb_state *mrb, mrb_value self)
 {
-  return ttymode(mrb, &self, set_noechomode);
+  return ttymode(mrb, (int)mrb_fixnum(mrb_io_fileno(mrb, self)), set_noechomode);
 }
 
 static mrb_value
