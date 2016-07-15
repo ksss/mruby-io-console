@@ -8,6 +8,7 @@ The implementation of io/console as CRuby.
 - `IO#raw!`
 - `IO#cooked`
 - `IO#cooked!`
+- `IO#noecho`
 - `IO#winsize`
 
 # Installation

@@ -36,6 +36,21 @@ assert 'IO#cooked' do
   end
 end
 
+assert 'IO#noecho' do
+  # TODO: fix mruby
+  # assert_raise(LocalJumpError) { $stdin.noecho }
+  result = $stdin.noecho do |io|
+    assert_equal $stdin, io
+    :ok
+  end
+  assert_equal :ok, result
+  assert_raise(StandardError) do
+    $stdin.noecho do |io|
+      raise StandardError
+    end
+  end
+end
+
 assert 'IO#winsize' do
   winsize = $stdin.winsize
   assert_kind_of Array, winsize

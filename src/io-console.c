@@ -40,6 +40,12 @@ set_cookedmode(conmode *t, void *arg)
   t->c_lflag |= (ECHO|ECHOE|ECHOK|ECHONL|ICANON|ISIG|IEXTEN);
 }
 
+static void
+set_noechomode(conmode *t, void *arg)
+{
+  t->c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL);
+}
+
 static mrb_value
 console_yield(mrb_state *mrb, mrb_value block)
 {
@@ -104,6 +110,12 @@ console_set_cooked(mrb_state *mrb, mrb_value self)
 }
 
 static mrb_value
+console_noecho(mrb_state *mrb, mrb_value self)
+{
+  return ttymode(mrb, &self, set_noechomode);
+}
+
+static mrb_value
 console_winsize(mrb_state *mrb, mrb_value self)
 {
   mrb_console_size_t ws;
@@ -121,6 +133,7 @@ mrb_mruby_io_console_gem_init(mrb_state* mrb)
   mrb_define_method(mrb, io, "raw!", console_set_raw, MRB_ARGS_NONE());
   mrb_define_method(mrb, io, "cooked", console_cooked, MRB_ARGS_NONE());
   mrb_define_method(mrb, io, "cooked!", console_set_cooked, MRB_ARGS_NONE());
+  mrb_define_method(mrb, io, "noecho", console_noecho, MRB_ARGS_NONE());
   mrb_define_method(mrb, io, "winsize", console_winsize, MRB_ARGS_NONE());
 }
 
