@@ -6,9 +6,39 @@
 #include "mruby/error.h"
 #include "mruby/ext/io.h"
 
+#if defined _WIN32
+/* License: Ruby's */
+SOCKET
+mrb_w32_get_osfhandle(int fh)
+{
+    return _get_osfhandle(fh);
+}
+#include <winioctl.h>
+typedef DWORD conmode;
+static int
+setattr(int fd, conmode *t)
+{
+    int x = SetConsoleMode((HANDLE)mrb_w32_get_osfhandle(fd), *t);
+    if (!x) errno = EINVAL;
+    return x;
+}
+static int
+getattr(int fd, conmode *t)
+{
+    int x = GetConsoleMode((HANDLE)mrb_w32_get_osfhandle(fd), t);
+    if (!x) errno = EINVAL;
+    return x;
+}
+typedef CONSOLE_SCREEN_BUFFER_INFO rb_console_size_t;
+#define getwinsize(fd, buf) ( \
+    GetConsoleScreenBufferInfo((HANDLE)mrb_w32_get_osfhandle(fd), (buf)) || (EINVAL, 0))
+#define winsize_row(buf) ((buf)->srWindow.Bottom - (buf)->srWindow.Top + 1)
+#define winsize_col(buf) (buf)->dwSize.X
+
+#else
+
 #include <termios.h>
 typedef struct termios conmode;
-
 static int
 setattr(int fd, conmode *t)
 {
@@ -18,26 +48,36 @@ setattr(int fd, conmode *t)
   return 1;
 }
 #define getattr(fd, t) (tcgetattr(fd, t) == 0)
-
 typedef struct winsize mrb_console_size_t;
 #define getwinsize(fd, buf) (ioctl((fd), TIOCGWINSZ, (buf)) == 0)
 #define setwinsize(fd, buf) (ioctl((fd), TIOCSWINSZ, (buf)) == 0)
 #define winsize_row(buf) (buf)->ws_row
 #define winsize_col(buf) (buf)->ws_col
 
+#endif
+
+
 static void
 set_rawmode(conmode *t, void *arg)
 {
+#if defined _WIN32
+  *t = 0;
+#else
   cfmakeraw(t);
   t->c_lflag &= ~(ECHOE|ECHOK);
+#endif
 }
 
 static void
 set_cookedmode(conmode *t, void *arg)
 {
+#if defined _WIN32
+  *t |= ENABLE_ECHO_INPUT|ENABLE_LINE_INPUT|ENABLE_PROCESSED_INPUT;
+#else
   t->c_iflag |= (BRKINT|ISTRIP|ICRNL|IXON);
   t->c_oflag |= OPOST;
   t->c_lflag |= (ECHO|ECHOE|ECHOK|ECHONL|ICANON|ISIG|IEXTEN);
+#endif
 }
 
 static mrb_value
