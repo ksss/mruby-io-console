@@ -47,24 +47,30 @@ console_yield(mrb_state *mrb, mrb_value block)
 }
 
 static mrb_value
-console_raw(mrb_state *mrb, mrb_value self)
+ttymode(mrb_state *mrb, int fd, mrb_value block, mrb_value self, void (*setter)(conmode *, void *))
 {
-  mrb_value block;
   mrb_value result;
   mrb_bool state;
   conmode t, bt;
 
-  mrb_get_args(mrb, "&", &block);
-  int fd = (int)mrb_fixnum(mrb_io_fileno(mrb, self));
   if (!getattr(fd, &t)) mrb_sys_fail(mrb, 0);
   bt = t;
-  set_rawmode(&t, NULL);
+  setter(&t, NULL);
   if (!setattr(fd, &t)) mrb_sys_fail(mrb, 0);
   result = mrb_protect(mrb, console_yield, block, &state);
   if (state) {
     mrb_exc_raise(mrb, result);
   }
   return self;
+}
+
+static mrb_value
+console_raw(mrb_state *mrb, mrb_value self)
+{
+  mrb_value block;
+  mrb_get_args(mrb, "&", &block);
+  int fd = (int)mrb_fixnum(mrb_io_fileno(mrb, self));
+  return ttymode(mrb, fd, block, self, set_rawmode);
 }
 
 static mrb_value
@@ -82,21 +88,9 @@ static mrb_value
 console_cooked(mrb_state *mrb, mrb_value self)
 {
   mrb_value block;
-  mrb_value result;
-  mrb_bool state;
-  conmode t, bt;
-
   mrb_get_args(mrb, "&", &block);
   int fd = (int)mrb_fixnum(mrb_io_fileno(mrb, self));
-  if (!getattr(fd, &t)) mrb_sys_fail(mrb, 0);
-  bt = t;
-  set_cookedmode(&t, NULL);
-  if (!setattr(fd, &t)) mrb_sys_fail(mrb, 0);
-  result = mrb_protect(mrb, console_yield, block, &state);
-  if (state) {
-    mrb_exc_raise(mrb, result);
-  }
-  return self;
+  return ttymode(mrb, fd, block, self, set_cookedmode);
 }
 
 static mrb_value
