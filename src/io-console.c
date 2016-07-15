@@ -46,7 +46,7 @@ console_yield(mrb_state *mrb, mrb_value block)
   return mrb_yield_argv(mrb, block, 1, &mrb->c->stack[0]);
 }
 
-static mrb_value *
+static mrb_value
 ttymode(mrb_state *mrb, mrb_value *self, void (*setter)(conmode *, void *))
 {
   mrb_value block;
@@ -66,13 +66,13 @@ ttymode(mrb_state *mrb, mrb_value *self, void (*setter)(conmode *, void *))
   if (state) {
     mrb_exc_raise(mrb, result);
   }
-  return self;
+  return result;
 }
 
 static mrb_value
 console_raw(mrb_state *mrb, mrb_value self)
 {
-  return *ttymode(mrb, &self, set_rawmode);
+  return ttymode(mrb, &self, set_rawmode);
 }
 
 static mrb_value
@@ -89,7 +89,7 @@ console_set_raw(mrb_state *mrb, mrb_value self)
 static mrb_value
 console_cooked(mrb_state *mrb, mrb_value self)
 {
-  return *ttymode(mrb, &self, set_cookedmode);
+  return ttymode(mrb, &self, set_cookedmode);
 }
 
 static mrb_value

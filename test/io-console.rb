@@ -9,9 +9,11 @@ end
 assert 'IO#raw' do
   # TODO: fix mruby
   # assert_raise(LocalJumpError) { $stdin.raw }
-  $stdin.raw do |io|
+  result = $stdin.raw do |io|
     assert_equal $stdin, io
+    :ok
   end
+  assert_equal :ok, result
   assert_raise(StandardError) do
     $stdin.raw do |io|
       raise StandardError
@@ -22,9 +24,11 @@ end
 assert 'IO#cooked' do
   # TODO: fix mruby
   # assert_raise(LocalJumpError) { $stdin.cooked }
-  $stdin.cooked do |io|
+  result = $stdin.cooked do |io|
     assert_equal $stdin, io
+    :ok
   end
+  assert_equal :ok, result
   assert_raise(StandardError) do
     $stdin.cooked do |io|
       raise StandardError
