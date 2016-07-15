@@ -38,6 +38,8 @@ set_cookedmode(conmode *t, void *arg)
   t->c_iflag |= (BRKINT|ISTRIP|ICRNL|IXON);
   t->c_oflag |= OPOST;
   t->c_lflag |= (ECHO|ECHOE|ECHOK|ECHONL|ICANON|ISIG|IEXTEN);
+}
+
 static mrb_value
 console_yield(mrb_state *mrb, mrb_value block)
 {
