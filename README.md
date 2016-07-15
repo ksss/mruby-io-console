@@ -1,5 +1,7 @@
 # mruby-io-console
 
+[![Build Status](https://travis-ci.org/ksss/mruby-io-console.svg?branch=master)](https://travis-ci.org/ksss/mruby-io-console)
+
 The implementation of io/console as CRuby.
 
 # Implemented API
