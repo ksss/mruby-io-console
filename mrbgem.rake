@@ -4,4 +4,5 @@ MRuby::Gem::Specification.new('mruby-io-console') do |spec|
 
   spec.add_dependency('mruby-io')
   spec.add_dependency('mruby-error', :core => 'mruby-error')
+  spec.cc.include_paths << "#{spec.build.gem_clone_dir}/mruby-io/include"
 end
