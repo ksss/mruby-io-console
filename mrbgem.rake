@@ -3,5 +3,5 @@ MRuby::Gem::Specification.new('mruby-io-console') do |spec|
   spec.author  = 'ksss <co000ri@gmail.com>'
 
   spec.add_dependency('mruby-io')
-  spec.add_dependency('mruby-error')
+  spec.add_dependency('mruby-error', :core => 'mruby-error')
 end
